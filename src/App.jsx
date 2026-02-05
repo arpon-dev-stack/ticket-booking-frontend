@@ -12,27 +12,31 @@ import SeatSelection from './pages/SeatSelection'
 import { useSelector } from 'react-redux';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useVerifyMutation } from './app/userSlice/userApi';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function App() {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token');
   const user = useSelector(state => state.user);
-
-  console.log(user)
-
   const [verify, { isSuccess, isError, isLoading }] = useVerifyMutation();
 
-  const verifyMe = async () => {
-    const response = await verify({ token })
-    console.log(response);
-  }
+  // Track if we have attempted to verify the existing token
+  const [isVerifyingInitialToken, setIsVerifyingInitialToken] = useState(!!token);
 
   useEffect(() => {
-    if (token) {
-      verifyMe()
-    }
-  }, [token, verify])
+    const checkToken = async () => {
+      if (token && !user.isAuthenticated) {
+        await verify({ token });
+      }
+      setIsVerifyingInitialToken(false); // Done checking
+    };
 
+    checkToken();
+  }, []);
+
+  // Block the entire app UI until the initial token check is done
+  if (isVerifyingInitialToken && isLoading) {
+    return <div className="h-screen flex items-center justify-center">Loading Application...</div>;
+  }
 
   return (
     <Router>
@@ -42,10 +46,31 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/book-ticket" element={<BookTicket />} />
-            <Route path="/select-seats" element={<ProtectedRoute success={isSuccess} error={isError} loading={isLoading}><SeatSelection /></ProtectedRoute>} />
+            <Route path="/select-seats" element={
+              <ProtectedRoute
+                success={isSuccess}
+                error={isError}
+                loading={token ? isLoading : false} // Only show loading if there's a token to verify
+              >
+                < SeatSelection />
+              </ProtectedRoute>} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/payment" element={<ProtectedRoute success={isSuccess} error={isError} loading={isLoading}><Payment /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute success={isSuccess} error={isError} loading={isLoading}><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/payment" element={
+              <ProtectedRoute
+                success={isSuccess}
+                error={isError}
+                loading={token ? isLoading : false} // Only show loading if there's a token to verify
+              >
+                <Payment />
+              </ProtectedRoute>} />
+            <Route path="/admin" element={
+              <ProtectedRoute
+                success={isSuccess}
+                error={isError}
+                loading={token ? isLoading : false} // Only show loading if there's a token to verify
+              >
+                <AdminDashboard />
+              </ProtectedRoute>} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signUp" element={<SignUp />} />
           </Routes>

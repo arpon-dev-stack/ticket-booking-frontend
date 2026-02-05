@@ -1,16 +1,21 @@
-import { useSelector } from 'react-redux';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-const ProtectedRoute = ({ isError, isLoading, children }) => {
+const ProtectedRoute = ({ children }) => {
     const { isAuthenticated } = useSelector((state) => state.user);
     const location = useLocation();
+    const token = localStorage.getItem('token');
 
-    if (isLoading || isError || !isAuthenticated) {
-        // Redirect to login but save the current location
-        return <Navigate to="/signin" state={{ from: location }} replace />;
+    // If there is a token but Redux isn't updated yet, just wait.
+    if (token && !isAuthenticated) {
+        return <div className="h-screen flex items-center justify-center">Authenticating...</div>;
     }
-    
-    return children;
+
+    if (isAuthenticated) {
+        return children;
+    }
+
+    return <Navigate to="/signin" state={{ from: location }} replace />;
 };
 
 export default ProtectedRoute;

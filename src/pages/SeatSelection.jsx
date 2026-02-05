@@ -1,367 +1,167 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bus, ArrowLeft, ArrowRight, CheckCircle, Info, User } from 'lucide-react';
+import { Bus, ArrowLeft, ArrowRight, CheckCircle, Info, User, Loader2 } from 'lucide-react';
 
 const SeatSelection = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // const { bus, searchParams } = location.state || {};
 
-  const bus = {
-    totalSeats: 40,
-    aeatsAvailable: 30,
-    price: 400,
-    name: "hello",
-    type: "electric",
-    departure: 1,
-    arrival: 7
-  }
+  // Get the bus ID passed from the ResultList component
+  const busId = location.state?.bus;
 
-  const searchParams = {
-    passengers: 15
-  }
-
-  console.log(bus)
+  /* In a real app, you'd do this:
+     const { data: bus, isLoading } = useGetBusByIdQuery(busId);
+  */
+  const seats = [
+    { id: 'A1', booked: true }, { id: 'A2', booked: false }, { id: 'A3', booked: false }, { id: 'A4', booked: false },
+    { id: 'B1', booked: false }, { id: 'B2', booked: true }, { id: 'B3', booked: false }, { id: 'B4', booked: false },
+    { id: 'C1', booked: false }, { id: 'C2', booked: false }, { id: 'C3', booked: true }, { id: 'C4', booked: false },
+    // ... add more as needed
+  ];
 
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [bookedSeats, setBookedSeats] = useState([]);
 
-  useEffect(() => {
-    // Generate random booked seats (in real app, this comes from backend)
-    if (bus) {
-      const numberOfBookedSeats = bus.totalSeats - bus.seatsAvailable;
-      const booked = [];
-      while (booked.length < numberOfBookedSeats) {
-        const randomSeat = Math.floor(Math.random() * bus.totalSeats) + 1;
-        if (!booked.includes(randomSeat)) {
-          booked.push(randomSeat);
-        }
-      }
-      setBookedSeats(booked);
-    }
-  }, [bus]);
+  const handleSeatClick = (seat) => {
+    if (seat.booked) return;
 
-  if (!bus) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-xl text-gray-600 mb-4">No bus selected</p>
-          <button
-            onClick={() => navigate('/book-ticket')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-          >
-            Go to Booking Page
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const handleSeatClick = (seatNumber) => {
-    if (bookedSeats.includes(seatNumber)) {
-      return; // Can't select booked seats
-    }
-
-    if (selectedSeats.includes(seatNumber)) {
-      // Deselect seat
-      setSelectedSeats(selectedSeats.filter(s => s !== seatNumber));
+    if (selectedSeats.includes(seat.id)) {
+      setSelectedSeats(selectedSeats.filter(id => id !== seat.id));
     } else {
-      // Select seat (check passenger limit)
-      if (selectedSeats.length < searchParams.passengers) {
-        setSelectedSeats([...selectedSeats, seatNumber]);
-      }
+      setSelectedSeats([...selectedSeats, seat.id]);
     }
   };
 
+  // --- MOCK DATA START ---
+  const [isLoading, setIsLoading] = useState(false);
+  const bus = {
+    _id: busId || "123",
+    totalSeats: 40,
+    availableSeats: 30,
+    price: 400,
+    name: "Green Line Express",
+    type: "AC Sleeper",
+    departure: "09:00 AM",
+    arrival: "05:00 PM",
+    bookedSeats: [1, 5, 12, 18, 22] // Mocking backend data
+  };
+  const passengersRequired = 1; // Default to 1 if not specified
+  // --- MOCK DATA END ---
+
+
   const getSeatStatus = (seatNumber) => {
-    if (bookedSeats.includes(seatNumber)) return 'booked';
+    if (bus.bookedSeats.includes(seatNumber)) return 'booked';
     if (selectedSeats.includes(seatNumber)) return 'selected';
     return 'available';
   };
 
   const getSeatClassName = (status) => {
-    const baseClasses = 'h-14 rounded-lg font-semibold transition-all transform hover:scale-105 relative';
-    
+    const base = 'h-12 w-full rounded-md flex items-center justify-center transition-all duration-200 border-2';
     switch (status) {
-      case 'booked':
-        return `${baseClasses} bg-gray-300 cursor-not-allowed text-gray-500`;
-      case 'selected':
-        return `${baseClasses} bg-green-500 text-white shadow-lg`;
-      case 'available':
-        return `${baseClasses} bg-blue-100 hover:bg-blue-200 text-blue-800 cursor-pointer border-2 border-blue-300`;
-      default:
-        return baseClasses;
+      case 'booked': return `${base} bg-gray-200 border-gray-300 cursor-not-allowed text-gray-400`;
+      case 'selected': return `${base} bg-green-500 border-green-600 text-white shadow-inner scale-95`;
+      default: return `${base} bg-white border-blue-200 text-blue-700 hover:border-blue-500 hover:bg-blue-50`;
     }
   };
 
-  const proceedToPayment = () => {
-    if (selectedSeats.length === searchParams.passengers) {
-      const bookingData = {
-        bus,
-        seats: selectedSeats.sort((a, b) => a - b),
-        totalAmount: bus.price * selectedSeats.length,
-        searchParams
-      };
-      navigate('/payment', { state: bookingData });
-    }
-  };
-
-  const totalAmount = bus.price * selectedSeats.length;
-
-  // Create seat layout - 2 columns with aisle
-  const renderSeatLayout = () => {
-    const rows = Math.ceil(bus.totalSeats / 4);
-    const layout = [];
-
-    for (let row = 0; row < rows; row++) {
-      const rowSeats = [];
-      
-      // Left side - 2 seats
-      for (let col = 0; col < 2; col++) {
-        const seatNumber = row * 4 + col + 1;
-        if (seatNumber <= bus.totalSeats) {
-          const status = getSeatStatus(seatNumber);
-          rowSeats.push(
-            <button
-              key={seatNumber}
-              onClick={() => handleSeatClick(seatNumber)}
-              disabled={status === 'booked'}
-              className={getSeatClassName(status)}
-            >
-              <div className="flex flex-col items-center justify-center">
-                <span className="text-lg font-bold">{seatNumber}</span>
-                {status === 'selected' && (
-                  <CheckCircle className="absolute top-1 right-1" size={16} />
-                )}
-              </div>
-            </button>
-          );
-        }
-      }
-
-      // Aisle
-      rowSeats.push(<div key={`aisle-${row}`} className="w-8"></div>);
-
-      // Right side - 2 seats
-      for (let col = 2; col < 4; col++) {
-        const seatNumber = row * 4 + col + 1;
-        if (seatNumber <= bus.totalSeats) {
-          const status = getSeatStatus(seatNumber);
-          rowSeats.push(
-            <button
-              key={seatNumber}
-              onClick={() => handleSeatClick(seatNumber)}
-              disabled={status === 'booked'}
-              className={getSeatClassName(status)}
-            >
-              <div className="flex flex-col items-center justify-center">
-                <span className="text-lg font-bold">{seatNumber}</span>
-                {status === 'selected' && (
-                  <CheckCircle className="absolute top-1 right-1" size={16} />
-                )}
-              </div>
-            </button>
-          );
-        }
-      }
-
-      layout.push(
-        <div key={row} className="grid grid-cols-5 gap-3 mb-3">
-          {rowSeats}
-        </div>
-      );
-    }
-
-    return layout;
-  };
+  if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate('/book-ticket')}
-            className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
-          >
-            <ArrowLeft className="mr-2" size={20} />
-            Back to Bus Selection
-          </button>
-          <h1 className="text-4xl font-bold text-gray-800">Select Your Seats</h1>
-          <p className="text-gray-600 mt-2">Choose {searchParams.passengers} seat(s) for your journey</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 py-10">
+      <div className="max-w-5xl mx-auto px-4">
+        <button onClick={() => navigate(-1)} className="flex items-center text-blue-600 mb-6 font-medium">
+          <ArrowLeft size={18} className="mr-2" /> Back to search
+        </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Seat Map */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              {/* Bus Info Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Bus size={32} />
-                    <div>
-                      <h2 className="text-2xl font-bold">{bus.name}</h2>
-                      <p className="text-blue-100">{bus.type}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-blue-100 text-sm">Departure</p>
-                    <p className="text-xl font-bold">{bus.departure}</p>
-                  </div>
-                </div>
+          {/* LEFT: Bus Interior */}
+          <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex justify-between items-center mb-8 border-b pb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{bus.name}</h2>
+                <span className="text-sm text-gray-500 uppercase tracking-widest">{bus.type}</span>
               </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-400 font-bold uppercase">Price</p>
+                <p className="text-xl font-black text-blue-600">৳{bus.price}</p>
+              </div>
+            </div>
 
-              {/* Selection Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div className="flex items-start space-x-2">
-                  <Info className="text-blue-600 mt-0.5" size={20} />
-                  <div>
-                    <p className="font-semibold text-blue-900">Selection Progress</p>
-                    <p className="text-blue-700 text-sm">
-                      {selectedSeats.length === 0 
-                        ? `Please select ${searchParams.passengers} seat(s)` 
-                        : selectedSeats.length === searchParams.passengers 
-                          ? '✓ All seats selected! Ready to proceed.' 
-                          : `${searchParams.passengers - selectedSeats.length} more seat(s) needed`}
-                    </p>
-                    {selectedSeats.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-xs text-blue-600 font-semibold">Selected Seats:</p>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {selectedSeats.sort((a, b) => a - b).map(seat => (
-                            <span key={seat} className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                              {seat}
-                            </span>
-                          ))}
-                        </div>
+            {/* Steering Wheel Area */}
+            <div className="flex justify-end mb-10 opacity-30">
+              <div className="border-4 border-gray-400 rounded-full p-2">
+                <div className="w-8 h-8 rounded-full border-t-4 border-gray-500"></div>
+              </div>
+            </div>
+
+            {/* Seat Grid */}
+            <div className="grid grid-cols-5 gap-3">
+              {seats.map((seat, index) => {
+                const isSelected = selectedSeats.includes(seat.id);
+                const status = seat.booked ? 'booked' : isSelected ? 'selected' : 'available';
+
+                // Logic: Insert aisle after the 2nd seat of every row (index 1, 5, 9, etc.)
+                const showAisle = (index + 1) % 4 === 2;
+
+                return (
+                  <React.Fragment key={seat.id}>
+                    <button
+                      disabled={seat.booked}
+                      onClick={() => handleSeatClick(seat)}
+                      className={getSeatClassName(status)}
+                    >
+                      <div className="flex flex-col items-center justify-center">
+                        <User size={14} />
+                        <span className="text-[10px] font-bold uppercase">{seat.id}</span>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+                    </button>
 
-              {/* Driver Section */}
-              <div className="bg-gray-100 rounded-t-lg p-4 text-center mb-4 border-2 border-gray-300">
-                <Bus className="inline-block text-gray-600 mb-2" size={32} />
-                <p className="text-sm font-semibold text-gray-700">DRIVER</p>
-                <div className="mt-2 text-xs text-gray-600">← Front of Bus</div>
-              </div>
-
-              {/* Seat Layout */}
-              <div className="bg-gray-50 p-6 rounded-lg">
-                {renderSeatLayout()}
-              </div>
-
-              {/* Legend */}
-              <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
-                <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center">
-                    <User size={20} className="text-blue-800" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">Available</p>
-                    <p className="text-xs text-gray-600">{bus.seatsAvailable} seats</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                    <CheckCircle size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">Selected</p>
-                    <p className="text-xs text-gray-600">{selectedSeats.length} seats</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center">
-                    <User size={20} className="text-gray-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">Booked</p>
-                    <p className="text-xs text-gray-600">{bookedSeats.length} seats</p>
-                  </div>
-                </div>
-              </div>
+                    {/* This div creates the physical aisle space */}
+                    {showAisle && <div className="w-full h-full" aria-hidden="true" />}
+                  </React.Fragment>
+                );
+              })}
             </div>
           </div>
 
-          {/* Booking Summary Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Booking Summary</h3>
-
-              <div className="space-y-4">
-                <div className="pb-4 border-b border-gray-200">
-                  <p className="text-sm text-gray-600 mb-1">Bus</p>
-                  <p className="font-semibold text-gray-800">{bus.name}</p>
-                  <p className="text-sm text-gray-600">{bus.type}</p>
+          {/* RIGHT: Summary Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <h3 className="font-bold text-lg mb-4 text-gray-800">Booking Summary</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Selected Seats</span>
+                  <span className="font-bold text-blue-600">
+                    {selectedSeats.length > 0 ? selectedSeats.join(', ') : 'None'}
+                  </span>
                 </div>
-
-                <div className="pb-4 border-b border-gray-200">
-                  <p className="text-sm text-gray-600 mb-1">Journey Details</p>
-                  <div className="text-sm space-y-1">
-                    <p><span className="font-semibold">Departure:</span> {bus.departure}</p>
-                    <p><span className="font-semibold">Arrival:</span> {bus.arrival}</p>
-                    <p><span className="font-semibold">Duration:</span> {bus.duration}</p>
-                  </div>
+                <div className="flex justify-between border-t pt-3">
+                  <span className="text-gray-500">Total Fare</span>
+                  <span className="text-lg font-black text-gray-800">৳{selectedSeats.length * bus.price}</span>
                 </div>
+              </div>
 
-                <div className="pb-4 border-b border-gray-200">
-                  <p className="text-sm text-gray-600 mb-1">Passengers</p>
-                  <p className="font-semibold text-gray-800">{searchParams.passengers} person(s)</p>
+              <button
+                disabled={selectedSeats.length === 0}
+                onClick={() => navigate('/payment', { state: { selectedSeats, bus } })}
+                className="w-full mt-6 bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all disabled:bg-gray-200 disabled:text-gray-400 flex items-center justify-center gap-2"
+              >
+                Continue to Payment <ArrowRight size={18} />
+              </button>
+            </div>
+
+            {/* Legend */}
+            <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+              <h4 className="text-xs font-bold text-blue-800 uppercase mb-4">Seat Legend</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm text-blue-900">
+                  <div className="w-6 h-6 bg-white border-2 border-blue-200 rounded"></div> Available
                 </div>
-
-                <div className="pb-4 border-b border-gray-200">
-                  <p className="text-sm text-gray-600 mb-2">Selected Seats</p>
-                  {selectedSeats.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {selectedSeats.sort((a, b) => a - b).map(seat => (
-                        <span key={seat} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                          {seat}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">No seats selected yet</p>
-                  )}
+                <div className="flex items-center gap-3 text-sm text-blue-900">
+                  <div className="w-6 h-6 bg-gray-200 rounded"></div> Booked
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Price per seat</span>
-                    <span className="font-semibold">${bus.price}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Number of seats</span>
-                    <span className="font-semibold">× {selectedSeats.length}</span>
-                  </div>
-                  <div className="flex justify-between pt-3 border-t border-gray-200">
-                    <span className="text-lg font-bold text-gray-800">Total Amount</span>
-                    <span className="text-2xl font-bold text-blue-600">${totalAmount}</span>
-                  </div>
+                <div className="flex items-center gap-3 text-sm text-blue-900">
+                  <div className="w-6 h-6 bg-green-500 rounded"></div> Your Selection
                 </div>
-
-                {selectedSeats.length === searchParams.passengers ? (
-                  <button
-                    onClick={proceedToPayment}
-                    className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
-                  >
-                    <span>Proceed to Payment</span>
-                    <ArrowRight size={20} />
-                  </button>
-                ) : (
-                  <button
-                    disabled
-                    className="w-full bg-gray-300 text-gray-500 py-4 rounded-lg font-semibold cursor-not-allowed"
-                  >
-                    Select {searchParams.passengers} Seat(s) to Continue
-                  </button>
-                )}
-
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  💡 Click on available seats to select them
-                </p>
               </div>
             </div>
           </div>

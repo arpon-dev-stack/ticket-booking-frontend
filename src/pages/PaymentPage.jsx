@@ -5,8 +5,10 @@ import { CreditCard, Lock, CheckCircle, Bus, MapPin } from 'lucide-react';
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const bookingData = location.state || {};
-  
+  const {bus} = location.state || {};
+
+  console.log(bus);
+
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [cardDetails, setCardDetails] = useState({
@@ -24,7 +26,7 @@ const Payment = () => {
     }, 1500);
   };
 
-  if (!bookingData.bus) {
+  if (!bus) {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="container mx-auto px-4 text-center">
@@ -52,12 +54,12 @@ const Payment = () => {
             <div className="bg-blue-50 p-6 rounded-lg mb-6 text-left">
               <h3 className="font-semibold text-gray-800 mb-3">Booking Details</h3>
               <div className="space-y-2">
-                <p className="text-gray-700"><strong>Bus:</strong> {bookingData.bus.name}</p>
-                <p className="text-gray-700"><strong>Seats:</strong> {bookingData.seats.join(', ')}</p>
-                <p className="text-gray-700"><strong>Departure:</strong> {bookingData.bus.departure}</p>
+                <p className="text-gray-700"><strong>Bus:</strong> {bus.bus.name}</p>
+                <p className="text-gray-700"><strong>Seats:</strong> {bus.seats.join(', ')}</p>
+                <p className="text-gray-700"><strong>Departure:</strong> {bus.bus.departure}</p>
                 <p className="text-gray-700"><strong>Booking ID:</strong> BKG{Math.floor(Math.random() * 1000000)}</p>
                 <p className="text-xl font-bold text-blue-600 mt-4">
-                  Total Paid: ${bookingData.totalAmount}
+                  Total Paid: ${bus.totalAmount}
                 </p>
               </div>
             </div>
@@ -97,20 +99,20 @@ const Payment = () => {
                 <div className="flex items-start space-x-3 pb-4 border-b">
                   <Bus className="text-blue-600 mt-1" size={24} />
                   <div>
-                    <h3 className="font-semibold text-gray-800">{bookingData.bus.name}</h3>
-                    <p className="text-sm text-gray-600">{bookingData.bus.type}</p>
+                    <h3 className="font-semibold text-gray-800">{bus.name}</h3>
+                    <p className="text-sm text-gray-600">{bus.type}</p>
                   </div>
                 </div>
 
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Departure Time</p>
-                  <p className="font-semibold text-gray-800">{bookingData.bus.departure}</p>
+                  <p className="font-semibold text-gray-800">{bus.departure}</p>
                 </div>
 
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Selected Seats</p>
                   <div className="flex flex-wrap gap-2">
-                    {bookingData.seats.map(seat => (
+                    {bus.bookedSeats.map(seat => (
                       <span key={seat} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                         {seat}
                       </span>
@@ -121,7 +123,7 @@ const Payment = () => {
                 <div className="pt-4 border-t">
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-600">Ticket Price</span>
-                    <span className="font-semibold">${bookingData.bus.price} x {bookingData.seats.length}</span>
+                    <span className="font-semibold">${bus.price} x {bus.bookedSeats.length}</span>
                   </div>
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-600">Service Fee</span>
@@ -129,7 +131,7 @@ const Payment = () => {
                   </div>
                   <div className="flex justify-between pt-2 border-t">
                     <span className="text-lg font-bold text-gray-800">Total Amount</span>
-                    <span className="text-2xl font-bold text-blue-600">${bookingData.totalAmount + 2}</span>
+                    <span className="text-2xl font-bold text-blue-600">${(bus.price * bus.bookedSeats.length) + 2}</span>
                   </div>
                 </div>
               </div>
@@ -190,7 +192,7 @@ const Payment = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
-                      <input
+                      <input autoComplete='on'
                         type="text"
                         placeholder="1234 5678 9012 3456"
                         value={cardDetails.cardNumber}
@@ -202,7 +204,7 @@ const Payment = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Cardholder Name</label>
-                      <input
+                      <input autoComplete='on'
                         type="text"
                         placeholder="John Doe"
                         value={cardDetails.cardName}
@@ -215,7 +217,7 @@ const Payment = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                        <input
+                        <input autoComplete='on'
                           type="text"
                           placeholder="MM/YY"
                           value={cardDetails.expiryDate}
@@ -226,7 +228,7 @@ const Payment = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">CVV</label>
-                        <input
+                        <input autoComplete='on'
                           type="text"
                           placeholder="123"
                           value={cardDetails.cvv}
@@ -248,7 +250,7 @@ const Payment = () => {
                       type="submit"
                       className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg mt-6"
                     >
-                      Pay ${bookingData.totalAmount + 2}
+                      Pay ${(bus.price * bus.bookedSeats.length) + 2}
                     </button>
                   </div>
                 </form>
@@ -258,7 +260,7 @@ const Payment = () => {
               {paymentMethod === 'upi' && (
                 <div className="text-center py-8">
                   <p className="text-gray-600 mb-4">Enter your UPI ID</p>
-                  <input
+                  <input autoComplete='on'
                     type="text"
                     placeholder="yourname@upi"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
@@ -267,7 +269,7 @@ const Payment = () => {
                     onClick={handlePayment}
                     className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg"
                   >
-                    Pay ${bookingData.totalAmount + 2}
+                    Pay ${(bus.price * bus.bookedSeats.length) + 2}
                   </button>
                 </div>
               )}
@@ -288,7 +290,7 @@ const Payment = () => {
                     onClick={handlePayment}
                     className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg"
                   >
-                    Pay ${bookingData.totalAmount + 2}
+                    Pay ${(bus.price * bus.bookedSeats.length) + 2}
                   </button>
                 </div>
               )}
