@@ -16,9 +16,13 @@ import {
     Edit,
     Trash2
 } from 'lucide-react';
+import { useSignOutMutation } from '../app/userSlice/userApi';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [signOut, { isError, isLoading, isSuccess }] = useSignOutMutation();
+    const navigate = useNavigate()
 
     const stats = [
         {
@@ -64,6 +68,16 @@ const AdminDashboard = () => {
         { id: 'BUS003', name: 'Comfort Plus', type: 'Non-AC', capacity: 50, status: 'Maintenance', driver: 'James Taylor' }
     ];
 
+    const handleLogout = async () => {
+        try {
+            await signOut().unwrap();
+            navigate('/');
+        } catch (error) {
+            alert("Failed to Sign out")
+        }
+
+    }
+
     const menuItems = [
         { id: 'dashboard', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
         { id: 'bookings', name: 'Bookings', icon: <Ticket size={20} /> },
@@ -96,9 +110,9 @@ const AdminDashboard = () => {
                                 <span className='sm:block hidden'>{item.name}</span>
                             </button>
                         ))}
-                        <button className="w-full flex items-center sm:justify-start sm:px-4 justify-center space-x-3 min-h-11 min-w-11 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition">
+                        <button onClick={handleLogout} className="w-full flex items-center sm:justify-start sm:px-4 justify-center space-x-3 min-h-11 min-w-11 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition">
                             <LogOut size={20} />
-                            <span className='sm:block hidden'>Logout</span>
+                            <span className='sm:block hidden'>Sign Out</span>
                         </button>
                     </nav>
                 </aside>

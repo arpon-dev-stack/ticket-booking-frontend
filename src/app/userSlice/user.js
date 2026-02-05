@@ -7,6 +7,7 @@ const user = createSlice({
         isAuthenticated: false,
         token: null,
         user: null,
+        role: null
     },
     reducers: {
         setUser: (state, actions) => {
@@ -31,7 +32,12 @@ const user = createSlice({
             state.isAuthenticated = false;
             state.user = null;
             state.token = null;
-            localStorage.removeItem('token')
+            localStorage.removeItem('token');
+        }).addMatcher(userApi.endpoints.verify.matchFulfilled, (state, actions) => {
+            state.isAuthenticated = true;
+            state.user = actions.payload.id;
+            state.role = actions.payload.role;
+            state.token = localStorage.getItem('token');
         })
     }
 })

@@ -105,9 +105,9 @@ const Header = () => {
               </Link>
             ))}
             {isAuthenticated ? (
-              <div className='flex flex-col bg-red-100'>
+              <div className='flex flex-col'>
                 <NavLink to="/admin" onClick={() => setIsOpen(false)} className={({ isActive }) => `${isActive ? 'bg-blue-800 text-yellow-300' : ''} hover:bg-blue-800 py-2 px-4 rounded`}>Admin</NavLink>
-                <button>Sign Out</button>
+                <button className='py-2 px-4 flex justify-start hover:bg-red-600 rounded-lg'>Sign Out</button>
               </div>
             ) : (
               <div className='flex flex-col'>

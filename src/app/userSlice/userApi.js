@@ -23,9 +23,16 @@ const userApi = createApi({
                 url: '/signout',
                 method: 'POST'
             })
-        })
+        }),
+        verify: builder.mutation({
+            query: (authData) => ({
+                url: '/verify',
+                method: 'POST',
+                body: authData
+            })
+        }),
     })
 })
 
 export default userApi;
-export const { useSignUpMutation, useSigninMutation } = userApi
+export const { useSignUpMutation, useSigninMutation, useSignOutMutation, useVerifyMutation } = userApi;

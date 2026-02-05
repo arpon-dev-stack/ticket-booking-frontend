@@ -11,8 +11,29 @@ import AdminDashboard from './pages/Dashboard';
 import SeatSelection from './pages/SeatSelection'
 import { useSelector } from 'react-redux';
 import ProtectedRoute from './components/ProtectedRoute';
+import { useVerifyMutation } from './app/userSlice/userApi';
+import { useEffect } from 'react';
 
 function App() {
+  const token = localStorage.getItem('token')
+  const user = useSelector(state => state.user);
+
+  console.log(user)
+
+  const [verify, { isSuccess, isError, isLoading }] = useVerifyMutation();
+
+  const verifyMe = async () => {
+    const response = await verify({ token })
+    console.log(response);
+  }
+
+  useEffect(() => {
+    if (token) {
+      verifyMe()
+    }
+  }, [token, verify])
+
+
   return (
     <Router>
       <div className="flex flex-col min-h-screen">
@@ -21,12 +42,12 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/book-ticket" element={<BookTicket />} />
-            <Route path="/select-seats" element={<ProtectedRoute><SeatSelection /></ProtectedRoute>} />
+            <Route path="/select-seats" element={<ProtectedRoute success={isSuccess} error={isError} loading={isLoading}><SeatSelection /></ProtectedRoute>} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/signin" element={<SignIn/>} />
-            <Route path="/signUp" element={<SignUp/>} />
+            <Route path="/payment" element={<ProtectedRoute success={isSuccess} error={isError} loading={isLoading}><Payment /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute success={isSuccess} error={isError} loading={isLoading}><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signUp" element={<SignUp />} />
           </Routes>
         </main>
         <Footer />
