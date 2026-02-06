@@ -1,15 +1,18 @@
 import { Link } from "react-router-dom"
 import { useSignUpMutation } from "../app/userSlice/userApi";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
     const [form, setForm] = useState({ email: '', password: '', name: '' });
     const [signUp, { isError, isLoading, isSuccess }] = useSignUpMutation();
+    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             await signUp(form).unwrap();
+            navigate('/signin')
         } catch (error) {
             console.log("failed to login", error)
 

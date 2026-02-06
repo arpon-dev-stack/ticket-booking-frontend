@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
 import { MapPin, Loader2, Calendar, ArrowRight, ArrowLeft } from 'lucide-react';
-import { useGetBusesQuery } from '../app/userSlice/busApi'; // Import the hook
+import { useGetBusesQuery } from '../app/busSlice/busApi'; // Import the hook
 import ResultList from '../components/ResultList';
 import ResultListSkeleton from '../components/ResultListSkeliton';
-import useDebouncer from '../hooks/useDebouncer'
+import useDebouncer from '../hooks/useDebouncer';
 
 const BookTicket = () => {
   const today = new Date().toISOString().split('T')[0];
@@ -12,29 +12,26 @@ const BookTicket = () => {
     from: '',
     to: '',
     date: today,
-    page: 1
+    pageNo: 1
   });
 
+  const debouncedValue = useDebouncer(searchParams, 1000)
+
   // Use the hook instead of useEffect/fetch
-  const { data, isLoading, isFetching, error } = useGetBusesQuery({
-    pageNo: searchParams.page,
-    from: searchParams.from,
-    to: searchParams.to,
-    date: searchParams.date,
-  });
+  const { data, isLoading, isFetching, error } = useGetBusesQuery(debouncedValue);
 
   const buses = data?.buses || [];
   const totalPages = data?.totalPages || 1;
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setSearchParams({...searchParams, page: 1}); // Resetting page triggers a re-fetch via RTK Query
+    setSearchParams({ ...searchParams, pageNo: 1 }); // Resetting pageNo triggers a re-fetch via RTK Query
   };
 
   const handlePageChange = (direction) => {
-    const nextP = direction === 'right' ? searchParams.page + 1 : searchParams.page - 1;
+    const nextP = direction === 'right' ? searchParams.pageNo + 1 : searchParams.pageNo - 1;
     if (nextP >= 1 && nextP <= totalPages) {
-      setSearchParams({...searchParams, page: nextP});
+      setSearchParams({ ...searchParams, pageNo: nextP });
     }
   };
 
@@ -110,17 +107,17 @@ const BookTicket = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center gap-6 mt-8 items-center">
-            <button 
-              onClick={() => handlePageChange("left")} 
-              disabled={searchParams.page === 1}
+            <button
+              onClick={() => handlePageChange("left")}
+              disabled={searchParams.pageNo === 1}
               className="p-2 border rounded-full disabled:opacity-30"
             >
               <ArrowLeft />
             </button>
-            <span className="font-bold">{searchParams.page} / {totalPages}</span>
-            <button 
-              onClick={() => handlePageChange("right")} 
-              disabled={searchParams.page === totalPages}
+            <span className="font-bold">{searchParams.pageNo} / {totalPages}</span>
+            <button
+              onClick={() => handlePageChange("right")}
+              disabled={searchParams.pageNo === totalPages}
               className="p-2 border rounded-full disabled:opacity-30"
             >
               <ArrowRight />

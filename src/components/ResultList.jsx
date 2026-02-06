@@ -4,16 +4,16 @@ import { useNavigate } from 'react-router-dom';
 const ResultList = ({ result }) => {
     // Helper to format the Mongo ISO Date to a readable time
     const formatTime = (dateString) => {
-        return new Date(dateString).toLocaleTimeString([], { 
-            hour: '2-digit', 
+        return new Date(dateString).toLocaleTimeString([], {
+            hour: '2-digit',
             minute: '2-digit',
-            hour12: true 
+            hour12: true
         });
     };
     const navigate = useNavigate()
 
     const handleSeatSelection = (data) => {
-        navigate('/select-seats', {state: {bus: data._id}})
+        navigate('/select-seats', { state: { bus: data._id } })
     }
 
     return (
@@ -22,12 +22,12 @@ const ResultList = ({ result }) => {
                 <h2 className="text-2xl font-bold text-gray-800">Available Buses</h2>
                 <p className="text-gray-600 font-medium">{result.length} buses found</p>
             </div>
-            
+
             <div className="space-y-4">
                 {result.map(bus => (
                     <div key={bus._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition border border-gray-100">
                         <div className="flex flex-col lg:flex-row justify-between gap-6">
-                            
+
                             {/* Bus Info Section */}
                             <div className="flex-1">
                                 <div className="flex items-center space-x-3 mb-3">

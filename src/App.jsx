@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react';
 
 function App() {
   const token = localStorage.getItem('token');
-  const user = useSelector(state => state.user);
+  const {isAuthenticated} = useSelector(state => state.user);
   const [verify, { isSuccess, isError, isLoading }] = useVerifyMutation();
 
   // Track if we have attempted to verify the existing token
@@ -24,7 +24,7 @@ function App() {
 
   useEffect(() => {
     const checkToken = async () => {
-      if (token && !user.isAuthenticated) {
+      if (token && !isAuthenticated) {
         await verify({ token });
       }
       setIsVerifyingInitialToken(false); // Done checking
