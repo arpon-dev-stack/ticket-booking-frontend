@@ -39,4 +39,4 @@ export const busApi = createApi({
   }),
 });
 
-export const { useGetBusesQuery, useGetBusQuery } = busApi;
+export const { useGetBusesQuery, useGetBusQuery, useLazyGetBusesQuery } = busApi;

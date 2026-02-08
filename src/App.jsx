@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useVerifyMutation } from './app/userSlice/userApi';
 import { useEffect, useState } from 'react';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   const token = localStorage.getItem('token');
@@ -76,6 +77,11 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <ToastContainer 
+        position='top-right'
+        autoClose={3000}
+        theme='colored'
+        />
       </div>
     </Router>
   );

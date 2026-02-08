@@ -1,10 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Loader2, Calendar, ArrowRight, ArrowLeft } from 'lucide-react';
-import { useGetBusesQuery } from '../app/busSlice/busApi'; // Import the hook
+import { useLazyGetBusesQuery } from '../app/busSlice/busApi'; // Import the lazy hook
 import ResultList from '../components/ResultList';
 import ResultListSkeleton from '../components/ResultListSkeliton';
-import useDebouncer from '../hooks/useDebouncer';
 
 const BookTicket = () => {
   const today = new Date().toISOString().split('T')[0];
@@ -15,30 +14,33 @@ const BookTicket = () => {
     pageNo: 1
   });
 
-  const debouncedValue = useDebouncer(searchParams, 1000)
+  const [getBuses, { data, isLoading, isFetching, error }] = useLazyGetBusesQuery();
 
-  // Use the hook instead of useEffect/fetch
-  const { data, isLoading, isFetching, error } = useGetBusesQuery(debouncedValue);
+  useEffect(() => {
+    getBuses(searchParams);
+  }, []);
 
   const buses = data?.buses || [];
   const totalPages = data?.totalPages || 1;
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setSearchParams({ ...searchParams, pageNo: 1 }); // Resetting pageNo triggers a re-fetch via RTK Query
+    getBuses({...searchParams, pageNo: 1});
   };
 
   const handlePageChange = (direction) => {
     const nextP = direction === 'right' ? searchParams.pageNo + 1 : searchParams.pageNo - 1;
     if (nextP >= 1 && nextP <= totalPages) {
-      setSearchParams({ ...searchParams, pageNo: nextP });
+      const newSearchParams = { ...searchParams, pageNo: nextP };
+      setSearchParams(newSearchParams);
+      getBuses(newSearchParams);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="mx-auto px-4">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">Book Your Ticket</h1>
+        <h1 className="text-4xl font-bold text-emerald-600 mb-8">Book Your Ticket</h1>
 
         {/* Search Form */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -49,7 +51,7 @@ const BookTicket = () => {
                 <MapPin className="absolute left-3 top-3 text-blue-500" size={18} />
                 <input
                   type="text"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg"
+                  className="w-full pl-10 pr-4 py-3 border h-12 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   value={searchParams.from}
                   onChange={(e) => setSearchParams({ ...searchParams, from: e.target.value })}
                 />
@@ -62,7 +64,7 @@ const BookTicket = () => {
                 <MapPin className="absolute left-3 top-3 text-red-500" size={18} />
                 <input
                   type="text"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg"
+                  className="w-full pl-10 pr-4 py-3 h-12 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   value={searchParams.to}
                   onChange={(e) => setSearchParams({ ...searchParams, to: e.target.value })}
                 />
@@ -75,7 +77,8 @@ const BookTicket = () => {
                 <Calendar className="absolute left-3 top-3 text-green-500" size={18} />
                 <input
                   type="date"
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg"
+                  min={today}
+                  className="w-full pl-10 pr-4 h-12 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   value={searchParams.date}
                   onChange={(e) => setSearchParams({ ...searchParams, date: e.target.value })}
                 />
@@ -85,7 +88,7 @@ const BookTicket = () => {
             <div className="flex items-end">
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition"
+                className="w-full bg-emerald-600 h-12 text-white py-3 rounded-lg font-bold hover:bg-emerald-500 transition"
               >
                 Search Buses
               </button>

@@ -1,16 +1,69 @@
-# React + Vite
+# Bus Ticket Booking
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a web application for booking bus tickets, built with React.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Vite:** A next-generation front-end tooling and build tool.
+- **React:** A JavaScript library for building user interfaces.
+- **React Router:** For routing and navigation within the application.
+- **Redux Toolkit:** For efficient state management.
+- **Tailwind CSS:** A utility-first CSS framework for styling.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- User authentication (Sign In/Sign Up)
+- Search for buses
+- View bus details and seat availability
+- Select seats and book tickets
+- View booking history (Dashboard)
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The project follows a standard React project structure:
+
+- `src/app`: Redux Toolkit store and slices.
+- `src/assets`: Static assets like images.
+- `src/components`: Reusable components used across the application.
+- `src/hooks`: Custom React hooks.
+- `src/pages`: Top-level page components.
+
+## Getting Started
+
+To get a local copy up and running, follow these simple steps.
+
+### Prerequisites
+
+- Node.js (v14 or later)
+- npm
+
+### Installation
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/your_username/bus-ticket-booking.git
+   ```
+2. Install NPM packages
+   ```sh
+   npm install
+   ```
+
+### Usage
+
+To run the app in development mode:
+
+```sh
+npm run dev
+```
+
+To build the app for production:
+
+```sh
+npm run build
+```
+
+To preview the production build:
+
+```sh
+npm run preview
+```

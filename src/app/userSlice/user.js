@@ -4,7 +4,7 @@ import userApi from '../userSlice/userApi'
 const user = createSlice({
     name: "user",
     initialState: {
-        isAuthenticated: !!localStorage.getItem('token'),
+        isAuthenticated: null,
         token: null,
         user: null,
         role: null

@@ -42,16 +42,16 @@ const Home = () => {
   ];
 
   return (
-    <div className="bg-white">
+    <div className=" bg-[#f9fafb]">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+      <section className="text-slate-500 py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <h1 className="text-5xl font-bold mb-6">Book Your Bus Tickets Online</h1>
-            <p className="text-xl mb-8 text-blue-100">
+            <h1 className="text-5xl font-bold mb-6 text-emerald-600">Book Your Bus Tickets Online</h1>
+            <p className="text-xl mb-8 text-emerald-600">
               Fast, easy, and reliable bus booking service. Travel anywhere, anytime with SwiftBus.
             </p>
-            <Link to="/book-ticket" className="bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-300 transition inline-block">
+            <Link to="/book-ticket" className="bg-emerald-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-emerald-600 transition inline-block">
               Book Ticket Now
             </Link>
           </div>
@@ -59,25 +59,25 @@ const Home = () => {
       </section>
 
       {/* Division Quick Links */}
-      <section className='p-2 flex gap-2 flex-wrap bg-gradient-to-r from-blue-600 to-blue-800 border-t'>
+      <section className='p-2 flex gap-2 flex-wrap bg-gradient-to-r'>
         {divisions.map(location => (
-          <span key={location.id} className='font-semibold text-blue-900 hover:bg-yellow-300 rounded-lg bg-yellow-400 p-2 text-md cursor-pointer transition'>
+          <Link to='/book-ticket' key={location.id} className='font-semibold text-white hover:bg-emrald-400 rounded-lg bg-emerald-500 hover:bg-emerald-600 p-2 text-md cursor-pointer transition'>
             {location.name}
-          </span>
+          </Link>
         ))}
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <section className="p-4">
+        <div className="mx-auto">
+          <div className="grid grid-cols-[auto] grid-flow-row sm:grid-cols-2 md:grid-cols-3 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-md transition">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-full mb-4">
+              <div key={index} className="p-4 rounded-2xl w-full shadow-sm bg-emerald-600 text-center hover:shadow-md transition">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
                   {stat.icon}
                 </div>
-                <h3 className="text-3xl font-bold text-gray-800">{stat.value}</h3>
-                <p className="text-gray-500 font-medium">{stat.label}</p>
+                <h3 className="text-3xl font-bold text-white">{stat.value}</h3>
+                <p className="text-white font-medium">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -85,17 +85,17 @@ const Home = () => {
       </section>
 
       {/* FAQ Accordion Section */}
-      <section className="py-20 container mx-auto px-4">
+      <section className="py-8 mx-auto px-4">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-center text-emerald-600 mb-12">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <div key={index} className="border border-gray-200 rounded-xl overflow-hidden">
+              <div key={index} className="border rounded-xl overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full flex items-center justify-between p-5 text-left bg-white duration-700 hover:bg-gray-50 transition"
+                  className="w-full flex items-center bg-emerald-500 justify-between p-5 text-white text-left duration-700 hover:bg-emerald-600 transition"
                 >
-                  <span className="font-semibold text-gray-700">{faq.question}</span>
+                  <span className="font-semibold text-white">{faq.question}</span>
                   {openFaq === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
                 
@@ -116,10 +116,10 @@ const Home = () => {
       </section>
 
       {/* Footer CTA */}
-      <section className="bg-blue-900 text-white py-12 text-center">
+      <section className="text-emerald-600 bg-transparent py-12 text-center">
         <h2 className="text-2xl font-bold mb-4">Ready to start your journey?</h2>
         <p className="mb-6 opacity-80">Join thousands of travelers who trust SwiftBus daily.</p>
-        <Link to="/signup" className="border-2 border-white px-6 py-2 rounded-lg hover:bg-white hover:text-blue-900 transition">
+        <Link to="/signup" className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition">
           Create an Account
         </Link>
       </section>
