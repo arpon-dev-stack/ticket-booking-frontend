@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
-import { useGetBusQuery } from '../app/busSlice/busApi';
+import { useGetBusQuery } from '../app/busSlice/busDetailApi';
 import Seat from '../components/Seat';
 
 const SeatSelection = () => {
@@ -9,7 +9,7 @@ const SeatSelection = () => {
   const navigate = useNavigate();
   const busId = location.state?.bus;
 
-  const { data, isLoading } = useGetBusQuery(busId);
+  const { data, isLoading, isSuccess } = useGetBusQuery(busId);
   const [selectedSeats, setSelectedSeats] = useState([]);
 
   const handleSeatClick = useCallback((seat) => {
@@ -23,7 +23,7 @@ const SeatSelection = () => {
   }, []);
 
   const totalFare = useMemo(() => {
-    return selectedSeats.length * (data?.price || 0);
+    return selectedSeats.length * (data?.bus.price || 0);
   }, [selectedSeats.length, data?.price]);
 
   if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
@@ -46,15 +46,15 @@ const SeatSelection = () => {
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-400 font-bold uppercase">Price</p>
-                <p className="text-xl font-black text-blue-600">৳{data?.price}</p>
+                <p className="text-xl font-black text-blue-600">৳{data?.bus.price}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-[auto_auto_10px_auto_auto] mob:grid-cols-5 gap-1 mob:gap-3">
-              {data?.seatSet.map((seat, index) => {
+              {isSuccess && data?.bus.seatSet.map((seat, index) => {
                 // Determine status inside map
                 const isSelected = selectedSeats.some(s => s.seatNumber === seat.seatNumber);
-                const status = seat.booked ? 'booked' : isSelected ? 'selected' : 'available';
+                const status = seat.booked.owner ? 'booked' : isSelected ? 'selected' : 'available';
                 const showAisle = (index + 1) % 4 === 2;
 
                 return (
@@ -81,7 +81,7 @@ const SeatSelection = () => {
               </div>
               <button
                 disabled={selectedSeats.length === 0}
-                onClick={() => navigate('/payment', { state: { selectedSeats, busId } })}
+                onClick={() => navigate('/payment', { state: { selectedSeats, busId, price: data?.bus?.price, departureDate: data?.bus?.departure?.date } })}
                 className={`w-full mt-6 ${selectedSeats.length === 0 ? 'bg-gray-400' : 'bg-blue-600'} flex justify-center items-center gap-4 text-white py-4 rounded-xl font-bold`}
               >
                 Continue to Payment <ArrowRight size={18} />
@@ -95,3 +95,47 @@ const SeatSelection = () => {
 };
 
 export default React.memo(SeatSelection);
+
+
+// {
+//     "message": "Bus retrieved successfully",
+//     "bus": {
+//         "departure": {
+//             "location": "Dhaka",
+//             "date": "2026-02-15T10:00:00.000Z"
+//         },
+//         "arrival": {
+//             "location": "Khulna",
+//             "date": "2026-02-15T22:00:00.000Z"
+//         },
+//         "amenities": [
+//             "waterbattle"
+//         ],
+//         "_id": "69889e3dbee19938156d75fc",
+//         "busNumber": "DK-02",
+//         "totalSeat": 45,
+//         "seatsPerRow": 4,
+//         "price": 400,
+//         "amodities": [
+//             "waterbattle",
+//             "charger"
+//         ],
+//         "busType": [
+//             "non-ac"
+//         ],
+//         "seatSet": [
+//             {
+//                 "booked": {
+//                     "owner": null,
+//                     "name": null
+//                 },
+//                 "seatNumber": "a1",
+//                 "_id": "69889e3dbee19938156d75fd"
+//             },
+//         ],
+//         "__v": 0,
+//         "availableSeats": 45,
+//         "id": "69889e3dbee19938156d75fc"
+//     },
+//     "availableSeats": 45
+// }

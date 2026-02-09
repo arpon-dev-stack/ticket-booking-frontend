@@ -24,12 +24,14 @@ import {
 import { useSignOutMutation } from '../app/userSlice/userApi';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [signOut, { isError, isLoading, isSuccess }] = useSignOutMutation();
     const navigate = useNavigate();
-    const { role } = useSelector(state => state.user);
+    const { role, user } = useSelector(state => state.user);
+    console.log()
     const email = 'arpon@gmail.com'
 
     const stats = [
@@ -76,12 +78,26 @@ const AdminDashboard = () => {
         { id: 'BUS003', name: 'Comfort Plus', type: 'Non-AC', capacity: 50, status: 'Maintenance', driver: 'James Taylor' }
     ];
 
-    const handleLogout = async () => {
+    const handleSignout = async () => {
         try {
-            await signOut().unwrap();
+            const response = signOut({user}).unwrap();
+            toast.promise(response, {
+                pending: "Sign In...",
+                success: {
+                    render({ data }) {
+                        return data?.message || 'Successfully SignIn.'
+                    }
+                },
+                error: {
+                    render({ data }) {
+                        return data?.message || "Failed To SignIn."
+                    }
+                }
+            });
+            await response;
             navigate('/');
         } catch (error) {
-            alert("Failed to Sign out")
+            console.log(error)
         }
 
     }
@@ -154,7 +170,7 @@ const AdminDashboard = () => {
                                 <span className='sm:block hidden'>{item.name}</span>
                             </button>
                         ))}
-                        <button onClick={handleLogout} className="w-full flex items-center sm:justify-start sm:px-4 justify-center space-x-3 min-h-11 min-w-11 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition">
+                        <button onClick={handleSignout} className="w-full flex items-center sm:justify-start sm:px-4 justify-center space-x-3 min-h-11 min-w-11 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition">
                             <LogOut size={20} />
                             <span className='sm:block hidden'>Sign Out</span>
                         </button>

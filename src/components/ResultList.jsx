@@ -53,8 +53,8 @@ const ResultList = ({ result }) => {
                                         <div>
                                             <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">Departure</p>
                                             <p className='font-bold text-gray-800'>{bus.departure.location}</p>
-                                            <p className="text-sm text-blue-600 font-semibold">{formatTime(bus.departure.time)}</p>
-                                            <p className="text-xs text-gray-500 italic">{bus.departure.station}</p>
+                                            <p className="text-sm text-blue-600 font-semibold">{formatTime(bus.departure.date)}</p>
+                                            {/* <p className="text-xs text-gray-500 italic">{bus.departure.station}</p> */}
                                         </div>
                                     </div>
 
@@ -63,8 +63,8 @@ const ResultList = ({ result }) => {
                                         <div>
                                             <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">Arrival</p>
                                             <p className='font-bold text-gray-800'>{bus.arrival.location}</p>
-                                            <p className="text-sm text-gray-600 font-semibold">{formatTime(bus.arrival.time)}</p>
-                                            <p className="text-xs text-gray-500 italic">{bus.arrival.station}</p>
+                                            <p className="text-sm text-gray-600 font-semibold">{formatTime(bus.arrival.date)}</p>
+                                            {/* <p className="text-xs text-gray-500 italic">{bus.arrival.station}</p> */}
                                         </div>
                                     </div>
 

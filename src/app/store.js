@@ -1,16 +1,20 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer from '../app/userSlice/user';
 import userApi from '../app/userSlice/userApi'
-import { busApi } from "./busSlice/busApi";
+import busListApi from "./busSlice/busListApi";
+import busDetailApi from "./busSlice/busDetailApi";
+import { paymentApi } from "./busSlice/paymentApi";
+import user from "./userSlice/user";
 
 const store = configureStore({
     reducer: {
-        user: userReducer,
+        [user.reducerPath]: user.reducer,
         [userApi.reducerPath]: userApi.reducer,
-        [busApi.reducerPath]: busApi.reducer
+        [busListApi.reducerPath]: busListApi.reducer,
+        [busDetailApi.reducerPath]: busDetailApi.reducer,
+        [paymentApi.reducerPath]: paymentApi.reducer
     },
-    middleware: (getDefaultMiddleware) => 
-        getDefaultMiddleware().concat(userApi.middleware, busApi.middleware)
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(userApi.middleware, busListApi.middleware, busDetailApi.middleware, paymentApi.middleware)
 })
 
 export default store;

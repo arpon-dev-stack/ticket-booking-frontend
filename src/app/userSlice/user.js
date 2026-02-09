@@ -1,46 +1,34 @@
 import { createSlice } from "@reduxjs/toolkit";
-import userApi from '../userSlice/userApi'
+import userApi from "./userApi";
 
 const user = createSlice({
-    name: "user",
+    name: 'user',
     initialState: {
-        isAuthenticated: null,
-        token: null,
-        user: null,
-        role: null
+        isAuthenticated: false,
+        role: 'guest'
     },
     reducers: {
-        setUser: (state, actions) => {
-            if (actions.payload.success) {
-                state.isAuthenticated = true;
-                state.token = actions.payload.token;
-                state.user = actions.payload.user;
-            } else {
-                state.isAuthenticated = false;
-                state.token = null;
-                state.user = null;
-            }
+        restartUser: (state) => {
+            state.isAuthenticated = false;
+            state.role = 'guest';
         }
     },
-    extraReducers: (builder) => {
-        builder.addMatcher(userApi.endpoints.signin.matchFulfilled, (state, { payload }) => {
+    extraReducers: builder => {
+        builder.addMatcher(userApi.endpoints.signin.matchFulfilled, (state, payload) => {
             state.isAuthenticated = true;
-            state.user = payload.user.id;
-            state.token = payload.token;
-            localStorage.setItem('token', payload.token);
-        }).addMatcher(userApi.endpoints.signOut.matchFulfilled, (state) => {
+            state.role = payload.role
+        }).addMatcher(userApi.endpoints.signOut.matchFulfilled, (state, payload) => {
             state.isAuthenticated = false;
-            state.user = null;
-            state.token = null;
-            localStorage.removeItem('token');
-        }).addMatcher(userApi.endpoints.verify.matchFulfilled, (state, actions) => {
+            state.role = 'guest'
+        }).addMatcher(userApi.endpoints.verify.matchFulfilled, (state, payload) => {
             state.isAuthenticated = true;
-            state.user = actions.payload.id;
-            state.role = actions.payload.role;
-            state.token = localStorage.getItem('token');
+            state.role = payload.role;
+        }).addMatcher(userApi.endpoints.verify.matchRejected, (state, payload) => {
+            state.isAuthenticated = false;
+            state.role = 'guest';
         })
     }
 })
 
-export default user.reducer;
-export const { setUser } = user.actions;
+export default user;
+export const {restartUser} = user.actions;

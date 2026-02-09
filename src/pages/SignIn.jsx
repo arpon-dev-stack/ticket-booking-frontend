@@ -37,7 +37,7 @@ const SignIn = () => {
                 <label className='text-sm font-semibold text-gray-600'>Email</label>
                 <input autoComplete='off' type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="p-2 rounded-lg focus:ring-2 border focus:ring-emerald-500 outline-none" />
                 <label className='text-sm font-semibold text-gray-600'>Password</label>
-                <input autoComplete='on' type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="p-2 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" />
+                <input autoComplete='on' type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="p-2 rounded-lg focus:ring-2 border focus:ring-emerald-500 outline-none" />
                 <button type="submit" className='p-2 bg-emerald-600 rounded-lg mt-5 text-white font-semibold hover:bg-emerald-500' >Sign In</button>
                 <span className="mt-3 text-sm font-semibold">Don't have account <Link className="text-blue-400 ml-3" to="/signup">Sign Up</Link></span>
             </form>

@@ -1,6 +1,6 @@
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, ScrollRestoration } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/HomePage';
@@ -9,38 +9,55 @@ import Contact from './pages/ContactPage';
 import Payment from './pages/PaymentPage';
 import AdminDashboard from './pages/Dashboard';
 import SeatSelection from './pages/SeatSelection'
-import { useSelector } from 'react-redux';
 import ProtectedRoute from './components/ProtectedRoute';
-import { useVerifyMutation } from './app/userSlice/userApi';
-import { useEffect, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { useVerifyMutation } from './app/userSlice/userApi';
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
+import ScrollToTop from './components/ScrollToTop';
+import { restartUser } from './app/userSlice/user';
 
 function App() {
-  const token = localStorage.getItem('token');
-  const {isAuthenticated} = useSelector(state => state.user);
-  const [verify, { isSuccess, isError, isLoading }] = useVerifyMutation();
 
-  // Track if we have attempted to verify the existing token
-  const [isVerifyingInitialToken, setIsVerifyingInitialToken] = useState(!!token);
+  const [verify] = useVerifyMutation();
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    const checkToken = async () => {
-      if (token && !isAuthenticated) {
-        await verify({ token });
+    const verifyUser = async () => {
+      const token = localStorage.getItem('token')
+      if (token) {
+        try {
+          const response = verify().unwrap();
+          toast.promise(response, {
+            pending: 'Verifying...',
+            success: {
+              render({ data }) {
+                return data.message || 'Verification successful'
+              }
+            },
+            error: {
+              render({ data }) {
+                dispatch(restartUser());
+                return data.message || 'Verification failed'
+              }
+            },
+          })
+
+          await response;
+
+        } catch (error) {
+          dispatch(restartUser());
+          localStorage.removeItem('token');
+        }
       }
-      setIsVerifyingInitialToken(false); // Done checking
-    };
-
-    checkToken();
-  }, []);
-
-  // Block the entire app UI until the initial token check is done
-  if (isVerifyingInitialToken && isLoading) {
-    return <div className="h-screen flex items-center justify-center">Loading Application...</div>;
-  }
+    }
+    verifyUser()
+  }, [verify]);
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="">
@@ -49,26 +66,17 @@ function App() {
             <Route path="/book-ticket" element={<BookTicket />} />
             <Route path="/select-seats" element={
               <ProtectedRoute
-                success={isSuccess}
-                error={isError}
-                loading={token ? isLoading : false} // Only show loading if there's a token to verify
               >
                 < SeatSelection />
               </ProtectedRoute>} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/payment" element={
               <ProtectedRoute
-                success={isSuccess}
-                error={isError}
-                loading={token ? isLoading : false} // Only show loading if there's a token to verify
               >
                 <Payment />
               </ProtectedRoute>} />
             <Route path="/admin" element={
               <ProtectedRoute
-                success={isSuccess}
-                error={isError}
-                loading={token ? isLoading : false} // Only show loading if there's a token to verify
               >
                 <AdminDashboard />
               </ProtectedRoute>} />
@@ -77,10 +85,10 @@ function App() {
           </Routes>
         </main>
         <Footer />
-        <ToastContainer 
-        position='top-right'
-        autoClose={3000}
-        theme='colored'
+        <ToastContainer
+          position='top-right'
+          autoClose={3000}
+          theme='colored'
         />
       </div>
     </Router>

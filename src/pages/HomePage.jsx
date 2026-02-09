@@ -70,9 +70,13 @@ const Home = () => {
       {/* Stats Section */}
       <section className="p-4">
         <div className="mx-auto">
-          <div className="grid grid-cols-[auto] grid-flow-row sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="p-4 rounded-2xl w-full shadow-sm bg-emerald-600 text-center hover:shadow-md transition">
+              <div
+                key={index}
+                className="p-4 rounded-2xl w-full shadow-sm bg-emerald-600 text-center hover:shadow-md transition 
+                 sm:last:col-span-2 sm:last:w-1/2 sm:last:justify-self-center md:last:col-span-1 md:last:w-full"
+              >
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 text-blue-600 rounded-full mb-4">
                   {stat.icon}
                 </div>
@@ -80,8 +84,7 @@ const Home = () => {
                 <p className="text-white font-medium">{stat.label}</p>
               </div>
             ))}
-          </div>
-        </div>
+          </div>        </div>
       </section>
 
       {/* FAQ Accordion Section */}
@@ -98,12 +101,11 @@ const Home = () => {
                   <span className="font-semibold text-white">{faq.question}</span>
                   {openFaq === index ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </button>
-                
+
                 {/* Accordion Content */}
-                <div 
-                  className={`overflow-hidden transition-all duration-700 ease-in-out ${
-                    openFaq === index ? 'max-h-40 border-t bg-gray-50' : 'max-h-0'
-                  }`}
+                <div
+                  className={`overflow-hidden transition-all duration-700 ease-in-out ${openFaq === index ? 'max-h-40 border-t bg-gray-50' : 'max-h-0'
+                    }`}
                 >
                   <div className="p-5 text-gray-600">
                     {faq.answer}

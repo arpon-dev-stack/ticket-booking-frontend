@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { MapPin, Loader2, Calendar, ArrowRight, ArrowLeft } from 'lucide-react';
-import { useLazyGetBusesQuery } from '../app/busSlice/busApi'; // Import the lazy hook
+import { useLazyGetBusesQuery } from '../app/busSlice/busListApi';
 import ResultList from '../components/ResultList';
 import ResultListSkeleton from '../components/ResultListSkeliton';
 
@@ -11,27 +10,29 @@ const BookTicket = () => {
     from: '',
     to: '',
     date: today,
-    pageNo: 1
+    page: 1
   });
 
   const [getBuses, { data, isLoading, isFetching, error }] = useLazyGetBusesQuery();
 
   useEffect(() => {
+    console.log('run')
     getBuses(searchParams);
   }, []);
 
   const buses = data?.buses || [];
-  const totalPages = data?.totalPages || 1;
+  const totalBus = data?.totalBus || 0;
 
   const handleSearch = (e) => {
     e.preventDefault();
-    getBuses({...searchParams, pageNo: 1});
+    
+    getBuses({...searchParams, page: 1});
   };
 
   const handlePageChange = (direction) => {
-    const nextP = direction === 'right' ? searchParams.pageNo + 1 : searchParams.pageNo - 1;
-    if (nextP >= 1 && nextP <= totalPages) {
-      const newSearchParams = { ...searchParams, pageNo: nextP };
+    const nextP = direction === 'right' ? searchParams.page + 1 : searchParams.page - 1;
+    if (nextP >= 1 && nextP <= totalBus) {
+      const newSearchParams = { ...searchParams, page: nextP };
       setSearchParams(newSearchParams);
       getBuses(newSearchParams);
     }
@@ -108,19 +109,19 @@ const BookTicket = () => {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalBus > 10 && (
           <div className="flex justify-center gap-6 mt-8 items-center">
             <button
               onClick={() => handlePageChange("left")}
-              disabled={searchParams.pageNo === 1}
+              disabled={searchParams.page === 1}
               className="p-2 border rounded-full disabled:opacity-30"
             >
               <ArrowLeft />
             </button>
-            <span className="font-bold">{searchParams.pageNo} / {totalPages}</span>
+            <span className="font-bold">{searchParams.page} / {Math.ceil(totalBus / 15)}</span>
             <button
               onClick={() => handlePageChange("right")}
-              disabled={searchParams.pageNo === totalPages}
+              disabled={searchParams.page === totalBus}
               className="p-2 border rounded-full disabled:opacity-30"
             >
               <ArrowRight />

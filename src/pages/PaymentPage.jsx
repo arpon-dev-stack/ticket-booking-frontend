@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CreditCard, Lock, CheckCircle, Bus, MapPin } from 'lucide-react';
-import { useGetBusQuery } from '../app/busSlice/busApi';
+import { useApplyPaymentMutation } from '../app/busSlice/paymentApi';
 import SummerySkeleton from '../components/SummerySkeleton';
+import { toast } from 'react-toastify';
 
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedSeats, busId } = location.state || {};
-  const { data, isLoading } = useGetBusQuery(busId);
+  const { selectedSeats, busId, price, departureDate } = location.state || {};
+  // const { data, isLoading } = useGetBusQuery(busId);
+  const [applyPayment, { data: paymentSuccess, isSuccess }] = useApplyPaymentMutation()
 
   const [paymentMethod, setPaymentMethod] = useState('card');
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [cardDetails, setCardDetails] = useState({
     cardNumber: '',
     cardName: '',
@@ -19,15 +20,36 @@ const Payment = () => {
     cvv: ''
   });
 
-  const handlePayment = (e) => {
+const seatNumbersToSend = selectedSeats.map(seat => seat.seatNumber);
+const finalDate = new Date(departureDate).toISOString().split('T')[0];
+
+  const handlePayment = async (e) => {
     e.preventDefault();
-    // Simulate payment processing
-    setTimeout(() => {
-      setPaymentSuccess(true);
-    }, 1500);
+    try {
+
+      const response = applyPayment({ busId, seat: seatNumbersToSend, departureDate: finalDate }).unwrap();
+      toast.promise(response, {
+        pending: "Payment ongoing...",
+        success: {
+          render({ data }) {
+            return data?.message || 'Successfully Payment.'
+          }
+        },
+        error: {
+          render({ data }) {
+            return data?.message || "Failed To Payment."
+          }
+        }
+      });
+      await response;
+      navigate('/admin');
+    } catch (error) {
+      console.log(error)
+    }
+
   };
 
-  if (!data) {
+  if (!selectedSeats) {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="container mx-auto px-4 text-center">
@@ -43,7 +65,7 @@ const Payment = () => {
     );
   }
 
-  if (paymentSuccess) {
+  if (isSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="container mx-auto px-4 max-w-2xl">
@@ -92,7 +114,7 @@ const Payment = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Booking Summary */}
-          {isLoading ? <SummerySkeleton />
+          {false ? <SummerySkeleton />
             :
             <div className="lg:col-span-1">
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
@@ -102,8 +124,12 @@ const Payment = () => {
                   <div className="flex items-start space-x-3 pb-4 border-b">
                     <Bus className="text-blue-600 mt-1" size={24} />
                     <div>
-                      <h3 className="font-semibold text-gray-800">{data.name}</h3>
-                      <p className="text-sm text-gray-600">{data.type}</p>
+                      <h3 className="font-semibold text-gray-800">
+                        {/* {data.name} */}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {/* {data.type} */}
+                      </p>
                     </div>
                   </div>
 
@@ -126,7 +152,9 @@ const Payment = () => {
                   <div className="pt-4 border-t">
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Ticket Price</span>
-                      <span className="font-semibold">${data.price} x {selectedSeats.length}</span>
+                      <span className="font-semibold">
+                        {/* ${data.price} x {selectedSeats.length} */}
+                      </span>
                     </div>
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Service Fee</span>
@@ -134,7 +162,9 @@ const Payment = () => {
                     </div>
                     <div className="flex justify-between pt-2 border-t">
                       <span className="text-lg font-bold text-gray-800">Total Amount</span>
-                      <span className="text-2xl font-bold text-blue-600">${(data.price * selectedSeats.length) + 2}</span>
+                      <span className="text-2xl font-bold text-blue-600">$
+                        {(price * selectedSeats.length) + 2}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -250,7 +280,7 @@ const Payment = () => {
                       type="submit"
                       className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg mt-6"
                     >
-                      Pay ${(data.price * selectedSeats.length) + 2}
+                      Pay ${(price * selectedSeats.length) + 2}
                     </button>
                   </div>
                 </form>
@@ -269,7 +299,7 @@ const Payment = () => {
                     onClick={handlePayment}
                     className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg"
                   >
-                    Pay ${(data.price * selectedSeats.length) + 2}
+                    Pay ${(price * selectedSeats.length) + 2}
                   </button>
                 </div>
               )}
@@ -290,7 +320,7 @@ const Payment = () => {
                     onClick={handlePayment}
                     className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg"
                   >
-                    Pay ${(data.price * selectedSeats.length) + 2}
+                    Pay ${(price * selectedSeats.length) + 2}
                   </button>
                 </div>
               )}
