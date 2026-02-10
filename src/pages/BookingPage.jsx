@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, Loader2, Calendar, ArrowRight, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useTransition } from 'react';
+import { MapPin, Calendar, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useLazyGetBusesQuery } from '../app/busSlice/busListApi';
 import ResultList from '../components/ResultList';
 import ResultListSkeleton from '../components/ResultListSkeliton';
+import SearchForm from '../components/SearchForm';
 
 const BookTicket = () => {
   const today = new Date().toISOString().split('T')[0];
+  const ITEMS_PER_PAGE = 15;
+  const [isPending, startTransition] = useTransition();
+
+
   const [searchParams, setSearchParams] = useState({
     from: '',
     to: '',
@@ -13,118 +18,90 @@ const BookTicket = () => {
     page: 1
   });
 
-  const [getBuses, { data, isLoading, isFetching, error }] = useLazyGetBusesQuery();
+  const [getBuses, { data, isLoading, isFetching }] = useLazyGetBusesQuery();
 
+  // Initial Fetch
   useEffect(() => {
-    console.log('run')
-    getBuses(searchParams);
-  }, []);
+    startTransition(() => {
+      getBuses(searchParams);
+    })
+  }, [getBuses]);
 
   const buses = data?.buses || [];
   const totalBus = data?.totalBus || 0;
+  const totalPages = Math.ceil(totalBus / ITEMS_PER_PAGE) || 1;
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    
-    getBuses({...searchParams, page: 1});
+  const handleSearchTrigger = (formValues) => {
+    const newParams = { ...formValues, page: 1 };
+    setSearchParams(newParams);
+    startTransition(() => {
+      getBuses(searchParams);
+    })
   };
 
   const handlePageChange = (direction) => {
-    const nextP = direction === 'right' ? searchParams.page + 1 : searchParams.page - 1;
-    if (nextP >= 1 && nextP <= totalBus) {
-      const newSearchParams = { ...searchParams, page: nextP };
-      setSearchParams(newSearchParams);
-      getBuses(newSearchParams);
+    const nextPage = direction === 'right' ? searchParams.page + 1 : searchParams.page - 1;
+
+    if (nextPage >= 1 && nextPage <= totalPages) {
+      const updatedParams = { ...searchParams, page: nextPage };
+      setSearchParams(updatedParams);
+      getBuses(updatedParams);
+
+      // Scroll to top of results smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto px-4">
+      <div className="mx-auto px-4 max-w-7xl">
         <h1 className="text-4xl font-bold text-emerald-600 mb-8">Book Your Ticket</h1>
 
-        {/* Search Form */}
+        {/* Search Form Box */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-600">From</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 text-blue-500" size={18} />
-                <input
-                  type="text"
-                  className="w-full pl-10 pr-4 py-3 border h-12 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                  value={searchParams.from}
-                  onChange={(e) => setSearchParams({ ...searchParams, from: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-600">To</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 text-red-500" size={18} />
-                <input
-                  type="text"
-                  className="w-full pl-10 pr-4 py-3 h-12 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                  value={searchParams.to}
-                  onChange={(e) => setSearchParams({ ...searchParams, to: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-600">Date</label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-3 text-green-500" size={18} />
-                <input
-                  type="date"
-                  min={today}
-                  className="w-full pl-10 pr-4 h-12 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                  value={searchParams.date}
-                  onChange={(e) => setSearchParams({ ...searchParams, date: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-end">
-              <button
-                type="submit"
-                className="w-full bg-emerald-600 h-12 text-white py-3 rounded-lg font-bold hover:bg-emerald-500 transition"
-              >
-                Search Buses
-              </button>
-            </div>
-          </form>
+          <SearchForm
+            onSearch={handleSearchTrigger}
+            initialParams={searchParams}
+            today={today}
+          />
         </div>
 
         {/* Results Area */}
-        <div className={isFetching ? "opacity-50 pointer-events-none" : ""}>
-          {isLoading ? (
+        <div className={`transition-opacity duration-200 ${isFetching ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+          {isLoading || isPending ? (
             <ResultListSkeleton />
           ) : buses.length > 0 ? (
             <ResultList result={buses} />
           ) : (
-            <div className="text-center py-20 bg-white rounded-lg">No buses found.</div>
+            <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
+              <p className="text-gray-500 text-lg">No buses found for this route or date.</p>
+            </div>
           )}
         </div>
 
         {/* Pagination */}
-        {totalBus > 10 && (
-          <div className="flex justify-center gap-6 mt-8 items-center">
+        {totalBus > ITEMS_PER_PAGE && (
+          <div className="flex justify-center gap-6 mt-12 items-center">
             <button
               onClick={() => handlePageChange("left")}
-              disabled={searchParams.page === 1}
-              className="p-2 border rounded-full disabled:opacity-30"
+              disabled={searchParams.page === 1 || isFetching}
+              className="p-3 border rounded-full hover:bg-gray-100 disabled:opacity-20 transition"
             >
-              <ArrowLeft />
+              <ArrowLeft size={20} />
             </button>
-            <span className="font-bold">{searchParams.page} / {Math.ceil(totalBus / 15)}</span>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Page</span>
+              <span className="font-bold text-emerald-700 text-lg">{searchParams.page}</span>
+              <span className="text-sm text-gray-500">of {totalPages}</span>
+            </div>
+
             <button
               onClick={() => handlePageChange("right")}
-              disabled={searchParams.page === totalBus}
-              className="p-2 border rounded-full disabled:opacity-30"
+              disabled={searchParams.page >= totalPages || isFetching}
+              className="p-3 border rounded-full hover:bg-gray-100 disabled:opacity-20 transition"
             >
-              <ArrowRight />
+              <ArrowRight size={20} />
             </button>
           </div>
         )}

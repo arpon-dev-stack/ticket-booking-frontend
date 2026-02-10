@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CreditCard, Lock, CheckCircle, Bus, MapPin } from 'lucide-react';
+import {ArrowLeft, CreditCard, Lock, CheckCircle, Bus, MapPin } from 'lucide-react';
 import { useApplyPaymentMutation } from '../app/busSlice/paymentApi';
 import SummerySkeleton from '../components/SummerySkeleton';
 import { toast } from 'react-toastify';
@@ -8,8 +8,7 @@ import { toast } from 'react-toastify';
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedSeats, busId, price, departureDate } = location.state || {};
-  // const { data, isLoading } = useGetBusQuery(busId);
+  const { selectedSeats, busId, price } = location.state || {};
   const [applyPayment, { data: paymentSuccess, isSuccess }] = useApplyPaymentMutation()
 
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -20,14 +19,15 @@ const Payment = () => {
     cvv: ''
   });
 
-const seatNumbersToSend = selectedSeats.map(seat => seat.seatNumber);
-const finalDate = new Date(departureDate).toISOString().split('T')[0];
+  console.log(paymentSuccess);
+
+  const seatNumbersToSend = selectedSeats.map(seat => seat.seatNumber);
 
   const handlePayment = async (e) => {
     e.preventDefault();
     try {
 
-      const response = applyPayment({ busId, seat: seatNumbersToSend, departureDate: finalDate }).unwrap();
+      const response = applyPayment({ busId, seat: seatNumbersToSend }).unwrap();
       toast.promise(response, {
         pending: "Payment ongoing...",
         success: {
@@ -37,12 +37,12 @@ const finalDate = new Date(departureDate).toISOString().split('T')[0];
         },
         error: {
           render({ data }) {
-            return data?.message || "Failed To Payment."
+            return data?.data?.message || "Failed To Payment."
           }
         }
       });
       await response;
-      navigate('/admin');
+      // navigate('/admin');
     } catch (error) {
       console.log(error)
     }
@@ -77,12 +77,12 @@ const finalDate = new Date(departureDate).toISOString().split('T')[0];
             <div className="bg-blue-50 p-6 rounded-lg mb-6 text-left">
               <h3 className="font-semibold text-gray-800 mb-3">Booking Details</h3>
               <div className="space-y-2">
-                <p className="text-gray-700"><strong>Bus:</strong> {data.data.name}</p>
-                <p className="text-gray-700"><strong>Seats:</strong> {data.seats.join(', ')}</p>
-                <p className="text-gray-700"><strong>Departure:</strong> {data.data.departure}</p>
+                <p className="text-gray-700"><strong>Bus:</strong> { }</p>
+                <p className="text-gray-700"><strong>Seats:</strong> {paymentSuccess.seat.join(', ')}</p>
+                <p className="text-gray-700"><strong>Departure:</strong> { }</p>
                 <p className="text-gray-700"><strong>Booking ID:</strong> BKG{Math.floor(Math.random() * 1000000)}</p>
                 <p className="text-xl font-bold text-blue-600 mt-4">
-                  Total Paid: ${data.totalAmount}
+                  Total Paid: ${paymentSuccess.amount}
                 </p>
               </div>
             </div>
@@ -109,7 +109,12 @@ const finalDate = new Date(departureDate).toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+
       <div className="container mx-auto px-4 max-w-6xl">
+        <button onClick={() => navigate(-1)} className="flex items-center text-blue-600 mb-6 font-medium">
+          <ArrowLeft size={18} className="mr-2" />
+          Back to search
+        </button>
         <h1 className="text-4xl font-bold text-gray-800 mb-8">Complete Your Payment</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
