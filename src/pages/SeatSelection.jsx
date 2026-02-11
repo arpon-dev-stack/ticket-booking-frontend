@@ -23,8 +23,8 @@ const SeatSelection = () => {
   }, []);
 
   const totalFare = useMemo(() => {
-    return selectedSeats.length * (data?.bus.price || 0);
-  }, [selectedSeats.length, data?.price]);
+    return selectedSeats.length * (data?.bus?.price || 0);
+  }, [selectedSeats.length, data?.bus?.price]);
 
   if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
 
@@ -41,17 +41,17 @@ const SeatSelection = () => {
             {/* ... Bus Info UI ... */}
             <div className="flex justify-between items-center mb-8 border-b pb-4">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 capitalize">{data?.busNumber}</h2>
-                <span className="text-sm text-gray-500 uppercase tracking-widest">{data?.busType}</span>
+                <h2 className="text-2xl font-bold text-gray-800 capitalize">{data?.bus?.busNumber}</h2>
+                <span className="text-sm text-gray-500 uppercase tracking-widest">{data?.bus?.busType}</span>
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-400 font-bold uppercase">Price</p>
-                <p className="text-xl font-black text-blue-600">৳{data?.bus.price}</p>
+                <p className="text-xl font-black text-blue-600">৳{data?.bus?.price}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-[auto_auto_10px_auto_auto] mob:grid-cols-5 gap-1 mob:gap-3">
-              {isSuccess && data?.bus.seatSet.map((seat, index) => {
+              {isSuccess && data?.seatSet.map((seat, index) => {
                 // Determine status inside map
                 const isSelected = selectedSeats.some(s => s.seatNumber === seat.seatNumber);
                 const status = seat.booked.owner ? 'booked' : isSelected ? 'selected' : 'available';
@@ -81,7 +81,7 @@ const SeatSelection = () => {
               </div>
               <button
                 disabled={selectedSeats.length === 0}
-                onClick={() => navigate('/payment', { state: { selectedSeats, busId, price: data?.bus?.price, departureDate: data?.bus?.departure?.date } })}
+                onClick={() => navigate('/payment', { state: { selectedSeats, busId, price: data?.bus?.price} })}
                 className={`w-full mt-6 ${selectedSeats.length === 0 ? 'bg-gray-400' : 'bg-blue-600'} flex justify-center items-center gap-4 text-white py-4 rounded-xl font-bold`}
               >
                 Continue to Payment <ArrowRight size={18} />

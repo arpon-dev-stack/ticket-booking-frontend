@@ -15,10 +15,10 @@ export const paymentApi = createApi({
     }),
     endpoints: (builder) => ({
         applyPayment: builder.mutation({
-            query: ({ busId, seat, departureDate }) => ({
+            query: ({ busId, seat}) => ({
                 url: '/',
                 method: 'POST',
-                body: { busId, seat, departureDate, }
+                body: { busId, seat }
             })
         })
     })

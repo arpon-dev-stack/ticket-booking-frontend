@@ -80,7 +80,7 @@ const AdminDashboard = () => {
 
     const handleSignout = async () => {
         try {
-            const response = signOut({user}).unwrap();
+            const response = signOut().unwrap();
             toast.promise(response, {
                 pending: "Sign In...",
                 success: {
